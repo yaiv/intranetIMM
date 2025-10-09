@@ -13,3 +13,8 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 });
+
+
+Route::get('/solicitudes', function () {
+    return view('solicitudes');
+})->middleware(['auth'])->name('solicitudes');
