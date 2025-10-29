@@ -43,6 +43,25 @@ class SolicitudForm extends Component
     public $cuentas = [];
 
 
+protected $rules = [
+        'responsable'     => 'required|string|max:255',
+        'solicitante'     => 'required|string|max:255',
+        'departamento'    => 'required', 
+        'edificio'        => 'required', 
+        'laboratorio'     => 'nullable|string|max:255', 
+        'conCargoA'       => 'required', 
+        'tipoServicio'    => 'required|array|min:1', 
+        'trabajoAFallarAparente' => 'required|string|min:10', 
+        'tipoEquipo'      => 'nullable|string|max:255',
+        'marca'           => 'nullable|string|max:255',
+        'modelo'          => 'nullable|string|max:255',
+        'clasificacion'   => 'nullable|string|max:255',
+        'noSerie'         => 'nullable|string|max:255',
+        'noInventario'    => 'nullable|string|max:255',
+        'cantidad'        => 'required|numeric|min:1',
+    ];
+
+
     /**
      * El método 'mount' se ejecuta cuando el componente se carga por primera vez.
      */
@@ -56,8 +75,8 @@ class SolicitudForm extends Component
     
         // --- Precargar datos del usuario ---
         $usuario = Auth::user();
-        $this->responsable = $usuario->name;
-        $this->solicitante = $usuario->name;
+        $this->responsable = $usuario->nombre . ' '. $usuario->apellido_paterno; // Ajusta según tu modelo de usuario
+        //$this->solicitante = $usuario->nombre;
     
         // --- Establecer valores por defecto ---
         // Dejamos los select vacíos para que el usuario elija
@@ -76,7 +95,7 @@ class SolicitudForm extends Component
     public function submitForm()
     {
         // --- VALIDACIÓN ---
-        // (La agregaremos después, por ahora nos enfocamos en la vista)
+        $this->validate();
         
         // --- LÓGICA DE GUARDADO ---
         // Aquí iría el código para guardar en la base de datos.

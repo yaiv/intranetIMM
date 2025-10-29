@@ -20,7 +20,7 @@
             {{-- Columna Solicitante --}}
             <div class="border-b border-black p-2">
                 <x-label for="solicitante" value="Solicitante:" class="font-bold" />
-                <x-input id="solicitante" type="text" class="mt-1 block w-full border-none" wire:model="solicitante" readonly />
+                <x-input id="solicitante" type="text" class="mt-1 block w-full border-none" wire:model="solicitante"  />
             </div>
         </div>
 
@@ -39,6 +39,7 @@
                         <option value="{{ $depto->id }}">{{ $depto->nombre }}</option>
                     @endforeach
                 </select>
+                @error('departamento') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             {{-- CORRECCIÓN 3: Estructura de Edificio simplificada --}}
@@ -52,6 +53,7 @@
                         <option value="{{ $edif->id }}">{{ $edif->nombre }}</option>
                     @endforeach
                 </select>
+                         @error('edificio') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             {{-- Columna Laboratorio/Cubículo (Esta estaba bien) --}}
