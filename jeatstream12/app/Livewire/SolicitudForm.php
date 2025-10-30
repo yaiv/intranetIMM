@@ -3,16 +3,16 @@
 namespace App\Livewire; 
 
 use Livewire\Component;
-use Illuminate\Support\Facades\Auth; // Necesario para obtener el usuario
-use App\Models\Departamento; // Cargar desde BD 
+use Illuminate\Support\Facades\Auth;
+use App\Models\Departamento;
 use App\Models\Edificio;    
-use App\Models\Cuenta;      // <-- (para "con cargo a")
+use App\Models\Cuenta;
+use App\Models\SolicitudServicio;
 
 class SolicitudForm extends Component
 {
     // --- PROPIEDADES PARA VINCULAR AL FORMULARIO ---
-    // (usando 'wire:model')
-
+    
     // Sección 1: Información del Usuario
     public $responsable;
     public $solicitante;
@@ -23,7 +23,7 @@ class SolicitudForm extends Component
     public $cuenta = '';
 
     // Sección 2: Tipo de Servicio (checkboxes)
-    public $tipoServicio = []; // Es un array porque son checkboxes
+    public $tipoServicio = [];
 
     // Sección 3: Descripción del Servicio
     public $trabajoAFallarAparente;
@@ -35,15 +35,18 @@ class SolicitudForm extends Component
     public $clasificacion;
     public $noSerie;
     public $noInventario;
-    public $cantidad = 1; // Valor por defecto
+    public $cantidad = 1;
 
     // --- PROPIEDADES PARA LAS LISTAS (DROPDOWNS) ---
     public $departamentos = [];
     public $edificios = [];
     public $cuentas = [];
 
+    // --- PROPIEDADES PARA EL MODAL ---
+    public $mostrarModal = false;
+    public $solicitudId = null; // Para guardar el ID de la solicitud creada
 
-protected $rules = [
+    protected $rules = [
         'responsable'     => 'required|string|max:255',
         'solicitante'     => 'required|string|max:255',
         'departamento'    => 'required', 
@@ -61,34 +64,26 @@ protected $rules = [
         'cantidad'        => 'required|numeric|min:1',
     ];
 
-
     /**
      * El método 'mount' se ejecuta cuando el componente se carga por primera vez.
      */
     public function mount()
     {
         // --- Cargar las listas desde la Base de Datos ---
-        // Asegúrate de cambiar 'nombre', 'numero', etc., por tus columnas reales
         $this->departamentos = Departamento::orderBy('nombre')->get();
         $this->edificios = Edificio::orderBy('nombre')->get();
-        $this->cuentas = Cuenta::orderBy('tipo')->get(); // O como se llame tu columna
+        $this->cuentas = Cuenta::orderBy('tipo')->get();
     
         // --- Precargar datos del usuario ---
         $usuario = Auth::user();
-        $this->responsable = $usuario->nombre . ' '. $usuario->apellido_paterno; // Ajusta según tu modelo de usuario
-        //$this->solicitante = $usuario->nombre;
+        $this->responsable = $usuario->nombre . ' ' . $usuario->apellido_paterno;
     
         // --- Establecer valores por defecto ---
-        // Dejamos los select vacíos para que el usuario elija
         $this->departamento = ''; 
         $this->edificio = '';
-    
-        // Si quieres que "1185" sea un ID por defecto, búscalo:
-        // $cuentaPorDefecto = Cuenta::where('numero', 1185)->first();
-        // $this->conCargoA = $cuentaPorDefecto ? $cuentaPorDefecto->id : '';
-        // Por ahora, lo dejaremos vacío:
         $this->conCargoA = '';
     }
+
     /**
      * El método 'submitForm' será llamado cuando se envíe el formulario.
      */
@@ -97,23 +92,57 @@ protected $rules = [
         // --- VALIDACIÓN ---
         $this->validate();
         
-        // --- LÓGICA DE GUARDADO ---
-        // Aquí iría el código para guardar en la base de datos.
-        // Ejemplo:
-        // Solicitud::create([
-        //     'responsable' => $this->responsable,
-        //     'departamento' => $this->departamento,
-        //     'tipo_servicio' => json_encode($this->tipoServicio), // Guardar el array
-        //     // ...etc
-        // ]);
+        // --- GUARDAR EN LA BASE DE DATOS ---
+        $solicitud = SolicitudServicio::create([
+            'responsable'                => $this->responsable,
+            'solicitante'                => $this->solicitante,
+            'departamento_id'            => $this->departamento,
+            'edificio_id'                => $this->edificio,
+            'laboratorio'                => $this->laboratorio,
+            'cuenta_id'                  => $this->conCargoA,
+            'tipo_servicio'              => $this->tipoServicio,
+            'trabajoAFallarAparente'     => $this->trabajoAFallarAparente,
+            'tipoEquipo'                 => $this->tipoEquipo,
+            'marca'                      => $this->marca,
+            'modelo'                     => $this->modelo,
+            'clasificacion'              => $this->clasificacion,
+            'noSerie'                    => $this->noSerie,
+            'noInventario'               => $this->noInventario,
+            'cantidad'                   => $this->cantidad,
+        ]);
 
-        // Mensaje de éxito para el usuario
-        session()->flash('mensaje', '¡Solicitud enviada con éxito!');
+        // Guardar el ID de la solicitud para el comprobante
+        $this->solicitudId = $solicitud->id;
         
-        // Opcional: Redirigir a otra página
-        // return redirect()->to('/dashboard');
+        // Mostrar el modal
+        $this->mostrarModal = true;
+        
+        // Limpiar el formulario
+        $this->reset([
+            'solicitante', 'departamento', 'edificio', 'laboratorio', 'conCargoA', 
+            'tipoServicio', 'trabajoAFallarAparente', 'tipoEquipo', 'marca', 
+            'modelo', 'clasificacion', 'noSerie', 'noInventario', 'cantidad'
+        ]);
     }
 
+    /**
+     * Método para cerrar el modal
+     */
+    public function cerrarModal()
+    {
+        $this->mostrarModal = false;
+        $this->solicitudId = null;
+    }
+
+    /**
+     * Método para descargar el comprobante
+     */
+    public function descargarComprobante()
+    {
+        // Aquí puedes implementar la lógica para generar el PDF
+        // Por ahora, redirigimos a una ruta que generará el comprobante
+        return redirect()->route('comprobante.descargar', ['id' => $this->solicitudId]);
+    }
 
     /**
      * El método 'render' es el que muestra la vista.
