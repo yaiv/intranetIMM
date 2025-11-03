@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\EstadoServicio;
 
 
 class SolicitudServicio extends Model
@@ -33,6 +34,7 @@ class SolicitudServicio extends Model
         'noSerie',
         'noInventario',
         'cantidad',
+        'estado_servicio_id'
     ];
 
     /**
@@ -43,6 +45,16 @@ class SolicitudServicio extends Model
     protected $casts = [
         'tipo_servicio' => 'array', // Le dice a Laravel que trate esto como un array
     ];
+
+    public function estadoServicio()
+{
+    return $this->belongsTo(EstadoServicio::class);
+}
+
+    public function responsable()
+    {
+        return $this->belongsTo(User::class, 'responsable_id');
+    }
 
     /**
      * Relación con Departamento
