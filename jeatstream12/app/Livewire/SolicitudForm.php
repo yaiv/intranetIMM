@@ -14,7 +14,8 @@ class SolicitudForm extends Component
     // --- PROPIEDADES PARA VINCULAR AL FORMULARIO ---
     
     // Sección 1: Información del Usuario
-    public $responsable;
+    public $responsable_id; // CAMBIADO: Ahora guarda el ID del usuario
+    public $responsableNombre; // NUEVO: Para mostrar el nombre en el formulario
     public $solicitante;
     public $departamento = '';
     public $edificio = '';
@@ -44,10 +45,10 @@ class SolicitudForm extends Component
 
     // --- PROPIEDADES PARA EL MODAL ---
     public $mostrarModal = false;
-    public $solicitudId = null; // Para guardar el ID de la solicitud creada
+    public $solicitudId = null;
 
     protected $rules = [
-        'responsable'     => 'required|string|max:255',
+        'responsable_id'  => 'required|exists:users,id', // CAMBIADO
         'solicitante'     => 'required|string|max:255',
         'departamento'    => 'required', 
         'edificio'        => 'required', 
@@ -67,22 +68,26 @@ class SolicitudForm extends Component
     /**
      * El método 'mount' se ejecuta cuando el componente se carga por primera vez.
      */
-    public function mount()
-    {
-        // --- Cargar las listas desde la Base de Datos ---
-        $this->departamentos = Departamento::orderBy('nombre')->get();
-        $this->edificios = Edificio::orderBy('nombre')->get();
-        $this->cuentas = Cuenta::orderBy('tipo')->get();
+
+public function mount()
+{
+    // --- Cargar las listas desde la Base de Datos ---
+    $this->departamentos = Departamento::orderBy('nombre')->get();
+    $this->edificios = Edificio::orderBy('nombre')->get();
+    $this->cuentas = Cuenta::orderBy('tipo')->get();
+
+    // --- Precargar datos del usuario ---
+    $usuario = Auth::user();
+    $this->responsable_id = $usuario->id;
+    // Incluye apellido materno para que coincida
+    $this->responsableNombre = trim($usuario->nombre . ' ' . $usuario->apellido_paterno . ' ' . $usuario->apellido_materno);
+
+    // --- Establecer valores por defecto ---
+    $this->departamento = ''; 
+    $this->edificio = '';
+    $this->conCargoA = '';
+}
     
-        // --- Precargar datos del usuario ---
-        $usuario = Auth::user();
-        $this->responsable = $usuario->nombre . ' ' . $usuario->apellido_paterno;
-    
-        // --- Establecer valores por defecto ---
-        $this->departamento = ''; 
-        $this->edificio = '';
-        $this->conCargoA = '';
-    }
 
     /**
      * El método 'submitForm' será llamado cuando se envíe el formulario.
@@ -94,7 +99,7 @@ class SolicitudForm extends Component
         
         // --- GUARDAR EN LA BASE DE DATOS ---
         $solicitud = SolicitudServicio::create([
-            'responsable'                => $this->responsable,
+            'responsable_id'             => $this->responsable_id, 
             'solicitante'                => $this->solicitante,
             'departamento_id'            => $this->departamento,
             'edificio_id'                => $this->edificio,
@@ -139,8 +144,6 @@ class SolicitudForm extends Component
      */
     public function descargarComprobante()
     {
-        // Aquí puedes implementar la lógica para generar el PDF
-        // Por ahora, redirigimos a una ruta que generará el comprobante
         return redirect()->route('comprobante.descargar', ['id' => $this->solicitudId]);
     }
 

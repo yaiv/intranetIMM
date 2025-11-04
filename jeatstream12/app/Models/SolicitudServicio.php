@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\EstadoServicio;
+use App\Models\User;
+use App\Models\Departamento;
+use App\Models\Edificio;
+use App\Models\Cuenta;
 
 
 class SolicitudServicio extends Model
@@ -19,7 +23,7 @@ class SolicitudServicio extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'responsable',
+        'responsable_id',
         'solicitante',
         'departamento_id',
         'edificio_id',

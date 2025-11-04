@@ -14,7 +14,8 @@
             <div class="border-b border-r border-black p-2">
                 <x-label for="responsable" value="Responsable:" class="font-bold" />
                 {{-- 'wire:model' vincula esta entrada a la propiedad $responsable en la clase --}}
-                <x-input id="responsable" type="text" class="mt-1 block w-full border-none" wire:model="responsable" readonly />
+                <x-input id="responsable" type="text" class="mt-1 block w-full border-none" wire:model="responsableNombre" readonly />
+                <input type="hidden" wire:model="responsable_id">
             </div>
 
             {{-- Columna Solicitante --}}

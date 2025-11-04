@@ -11,11 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::table('solicitud_servicios', function (Blueprint $table) {
-        $table->foreignId('estado_servicio_id')
-              ->default(2) // <-- ¡Importante! Por defecto será '2' (En Proceso)
-              ->after('cantidad') 
-              ->constrained('estado_servicios'); // Enlaza con la tabla 'estado_servicios'
+        Schema::table('solicitud_servicios', function (Blueprint $table) {
+            
+            // --- ESTA ES LA LÍNEA CLAVE ---
+            // Solo intenta agregar la columna SI NO existe ya
+            if (!Schema::hasColumn('solicitud_servicios', 'estado_servicio_id')) {
+
+                $table->foreignId('estado_servicio_id')
+                      ->default(2) // <-- ¡Importante! Por defecto será '2' (En Proceso)
+                      ->after('cantidad') 
+                      ->constrained('estado_servicios'); // Enlaza con la tabla 'estado_servicios'
+            }
         });
     }
 
@@ -25,10 +31,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('solicitud_servicios', function (Blueprint $table) {
-        // Importante para poder revertir en orden
-        $table->dropForeign(['estado_servicio_id']);
-        $table->dropColumn('estado_servicio_id');
-            //
+            
+            // --- PARA REVERTIR ---
+            // Solo intenta borrarla SI SÍ existe
+            if (Schema::hasColumn('solicitud_servicios', 'estado_servicio_id')) {
+                
+                // Importante para poder revertir en orden
+                $table->dropForeign(['estado_servicio_id']);
+                $table->dropColumn('estado_servicio_id');
+            }
         });
     }
 };
