@@ -8,6 +8,10 @@ use App\Models\Departamento;
 use App\Models\Edificio;    
 use App\Models\Cuenta;
 use App\Models\SolicitudServicio;
+use App\Models\EstadoServicio; // Necesario para la lista
+use Barryvdh\DomPDF\Facade\Pdf; // Para el PDF
+
+
 
 class SolicitudForm extends Component
 {

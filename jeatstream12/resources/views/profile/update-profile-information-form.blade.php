@@ -4,7 +4,7 @@
     </x-slot>
 
     <x-slot name="description">
-        {{ __('Actualiza la información del perfil y la dirección de correo electrónico de tu cuenta. dfdf') }}
+        {{ __('Actualiza la información del perfil y la dirección de correo electrónico de tu cuenta.') }}
     </x-slot>
 
     <x-slot name="form">
@@ -39,12 +39,12 @@
                 </div>
 
                 <x-secondary-button class="mt-2 me-2" type="button" x-on:click.prevent="$refs.photo.click()">
-                    {{ __('Select A New Photo') }}
+                    {{ __('Cargar Nueva Foto') }}
                 </x-secondary-button>
 
                 @if ($this->user->profile_photo_path)
                     <x-secondary-button type="button" class="mt-2" wire:click="deleteProfilePhoto">
-                        {{ __('Remove Photo') }}
+                        {{ __('Eliminar Foto') }}
                     </x-secondary-button>
                 @endif
 
@@ -54,9 +54,16 @@
 
         <!-- Name -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="name" value="{{ __('Name') }}" />
+            <x-label for="name" value="{{ __('Nombre') }}" />
             <x-input id="name" type="text" class="mt-1 block w-full" wire:model="state.name" required autocomplete="name" />
             <x-input-error for="name" class="mt-2" />
+
+             @if(isset($solicitud->responsable))
+                 {{ $solicitud->responsable->nombre ?? '' }} {{ $solicitud->responsable->apellido_paterno ?? '' }} {{ $solicitud->responsable->apellido_materno ?? '' }}
+             @else
+                 N/A
+             @endif    
+
         </div>
 
         <!-- Email -->
