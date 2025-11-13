@@ -34,8 +34,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 1. MUESTRA la vista de "Mis Solicitudes" y el formulario para crear
     // Esta vista (solicitudes.blade.php) debe tener <@livewire('solicitud-form') />
     Route::get('/solicitudes', function () {
-        return view('solicitudes');
+        return view('solicitudes.index');
     })->name('solicitudes.index');
+
+        Route::get('/solicitudes/crear', function () {
+        return view('solicitudes.create');
+    })->name('solicitudes.create');
     
 
     // 3. DESCARGA el PDF (Movido aquí por seguridad)
@@ -55,7 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 // --- RUTAS PARA ADMINISTRADOR ---
-Route::middleware(['auth', 'verified', 'role:admin']) // <-- ¡LA MAGIA DE SPATIE!
+Route::middleware(['auth', 'verified', 'role:administrador']) // <-- ¡LA MAGIA DE SPATIE!
      ->prefix('admin') // <-- Todas las URLs inician con /admin/...
      ->name('admin.')   // <-- Todos los nombres de ruta inician con admin....
      ->group(function () {

@@ -25,7 +25,7 @@ class SolicitudController extends Controller
                         ->get();
 
         // 2. Cargar todos los estados disponibles (para el dropdown)
-        $estados = EstadoServicio::orderBy('nombre')->get();
+        $estados = EstadoServicio::orderBy('estado')->get();
         
         // 3. Mostrar la vista del admin y pasarle los datos
         return view('admin.solicitudes', compact('solicitudes', 'estados'));
