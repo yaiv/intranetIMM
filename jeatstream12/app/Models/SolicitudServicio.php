@@ -84,4 +84,15 @@ class SolicitudServicio extends Model
         return $this->belongsTo(Cuenta::class);
     }
 
+
+    public function comentarios()
+    {
+        return $this->hasMany(SolicitudComentario::class, 'solicitud_servicio_id');
+    }
+
+    public function estado()
+    {
+        return $this->belongsTo(EstadoServicio::class, 'estado_servicio_id');
+    }
+
 }
