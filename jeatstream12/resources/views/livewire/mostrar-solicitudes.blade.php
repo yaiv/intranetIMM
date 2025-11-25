@@ -4,7 +4,7 @@
             <div class="text-2xl">Historial de Solicitudes de Servicio</div>
         </div>
         <div class="mt-2 text-gray-500">
-            Aquí puedes ver todas las solicitudes de servicio generadas en el sistema.
+            Aquí puedes ver todas las solicitudes generadas.
         </div>
     </div>
 

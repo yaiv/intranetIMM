@@ -10,6 +10,8 @@ use App\Models\Cuenta;
 use App\Models\SolicitudServicio;
 use App\Models\EstadoServicio; // Necesario para la lista
 use Barryvdh\DomPDF\Facade\Pdf; // Para el PDF
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SolicitudConfirmacion;
 
 
 
@@ -122,6 +124,10 @@ public function mount()
 
         // Guardar el ID de la solicitud para el comprobante
         $this->solicitudId = $solicitud->id;
+
+        // --- Enviar Email de confirmacion al generar la solicitud de servicio ---
+
+        Mail::to(Auth::user()->email)->send(new SolicitudConfirmacion($solicitud));
         
         // Mostrar el modal
         $this->mostrarModal = true;

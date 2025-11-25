@@ -62,7 +62,7 @@ public function render()
     public function actualizarEstado($nuevoEstadoId)
     {
         // Validar: Si rechaza 
-        // Ajusta el ID 3 al ID que corresponda a "Rechazado" en tu BD
+        // Ajusta el ID 3 al ID que corresponda a "Rechazado" en BD
         if ($nuevoEstadoId == 3 && empty($this->comentarioAdmin)) {
             $this->addError('comentarioAdmin', 'Debes agregar un motivo para rechazar la solicitud.');
             return;
@@ -82,6 +82,6 @@ public function render()
         $this->solicitudSeleccionada->save();
 
         $this->verModalDetalle = false;
-        $this->dispatch('notify', 'Solicitud actualizada correctamente'); // Si usas notificaciones
+        $this->dispatch('notify', 'Solicitud actualizada correctamente'); 
     }
 }
