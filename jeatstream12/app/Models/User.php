@@ -8,6 +8,9 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Jetstream\HasProfilePhoto;
 use Spatie\Permission\Traits\HasRoles;
 
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable, HasProfilePhoto, HasRoles;
@@ -35,4 +38,28 @@ class User extends Authenticatable
     {
         return trim("{$this->nombre} {$this->apellido_paterno} {$this->apellido_materno}");
     }
+
+    // Relación 1:1 con Perfil  (Datos únicos: SNI, PRIDE, Oficina)
+    public function perfil(): HasOne
+    {
+        return $this->hasOne(Perfil::class);
+    }
+
+    // Relación 1:N con Publicaciones
+    public function publicaciones(): HasMany
+    {
+        return $this->hasMany(Publicacion::class)->orderBy('anio', 'desc');
+    }
+
+    // Relación 1:N con Formacion Profesional
+    public function formacionProfesional(): HasMany{
+        return $this->hasMany(FormacionProfesional::class)->orderBy('anio_fin', 'desc');
+    }
+
+    // Relación con Líneas de Investigación
+    public function lineasInvestigacion(): HasMany
+    {
+        return $this->hasMany(LineaInvestigacion::class);
+    } 
+
 }

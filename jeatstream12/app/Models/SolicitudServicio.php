@@ -47,7 +47,7 @@ class SolicitudServicio extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'tipo_servicio' => 'array', // Le dice a Laravel que trate esto como un array
+        'tipo_servicio' => 'array', 
     ];
 
     public function estadoServicio()

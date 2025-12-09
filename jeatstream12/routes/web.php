@@ -7,7 +7,7 @@ use App\Http\Controllers\Admin\SolicitudController as AdminSolicitudController;
 // Modelos y Facades para la ruta del PDF
 use App\Models\SolicitudServicio;
 use Barryvdh\DomPDF\Facade\Pdf;
-
+use App\Http\Controllers\Publico\InvestigadorController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -41,6 +41,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('solicitudes.create');
     })->name('solicitudes.create');
     
+
+    // --- NUEVA RUTA PERFIL ACADÉMICO ---
+    // Esta ruta carga la vista contenedora que creamos en el Paso 1
+    Route::get('/perfil/academico', function () {
+        return view('academicos.index');
+    })->name('perfil.academico');
 
     // 3. DESCARGA el PDF (Movido aquí por seguridad)
     Route::get('/comprobante/{id}', function($id) {
@@ -80,6 +86,10 @@ Route::middleware(['auth', 'verified', 'role:administrador']) // <-- ¡LA MAGIA 
     // Route::resource('/usuarios', AdminUsuarioController::class);
 });
 
+
+// --- RUTA PÚBLICA DE PERFIL ---
+Route::get('/investigador/{id}', [InvestigadorController::class, 'show'])
+    ->name('investigador.publico');
 
 // En routes/web.php
 Route::get('/test-roles', function() {
