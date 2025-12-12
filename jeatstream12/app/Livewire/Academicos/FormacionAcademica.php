@@ -51,7 +51,7 @@ class FormacionAcademica extends Component
             'titulo_obtenido' => $this->titulo_obtenido,
             'anio_fin' => $this->anio_fin,
             'pais' => $this->pais,
-            // 'anio_inicio' => ... (opcional si quieres agregarlo)
+
         ]);
 
         $this->reset(['grado_academico', 'institucion', 'titulo_obtenido', 'anio_fin', 'pais']);

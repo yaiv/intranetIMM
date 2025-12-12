@@ -10,4 +10,5 @@
             @livewire('mostrar-solicitudes') 
         </div>
     </div>
+
 </x-app-layout>

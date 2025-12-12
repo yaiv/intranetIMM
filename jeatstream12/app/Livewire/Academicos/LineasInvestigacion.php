@@ -51,7 +51,7 @@ public function eliminarLinea($id)
     public function render()
     {
         return view('livewire.academicos.lineas-investigacion', [
-            'lineas' => $this->lineas, // Usamos la propiedad computada
+            'lineas' => $this->lineas, 
         ]);
     }
 }
