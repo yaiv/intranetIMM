@@ -39,12 +39,6 @@ class User extends Authenticatable
         return trim("{$this->nombre} {$this->apellido_paterno} {$this->apellido_materno}");
     }
 
-    // Relación 1:1 con Perfil  (Datos únicos: SNI, PRIDE, Oficina)
-    public function perfil(): HasOne
-    {
-        return $this->hasOne(Perfil::class);
-    }
-
     // Relación 1:N con Publicaciones
     public function publicaciones(): HasMany
     {
@@ -61,5 +55,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(LineaInvestigacion::class);
     } 
+
+    public function profile(): HasOne
+    {
+        return $this->hasOne(Perfil::class);
+    }
+
+    public function estudios()
+    {
+        return $this->hasMany(FormacionProfesional::class, 'user_id')
+                    ->orderBy('anio_fin', 'desc'); // Ordenar del más reciente al más antiguo
+    }
 
 }

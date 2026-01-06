@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SolicitudController as AdminSolicitudController;
 use App\Models\SolicitudServicio;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Publico\InvestigadorController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,45 +17,48 @@ use App\Http\Controllers\Publico\InvestigadorController;
 
 Route::redirect('/', '/login');
 
-// --- RUTAS DE JETSTREAM/AUTH (Dashboard principal) ---
+// --- RUTAS PROTEGIDAS (Requieren Login) ---
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    
+    // 1. Dashboard Principal
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // 2. NUEVA RUTA DE PERFIL (Ahora sí está protegida)
+    Route::get('/mi-perfil', function () {
+        return view('profile.show-researcher');
+    })->name('researcher.profile');
+
 });
 
-
-// --- RUTAS PARA USUARIO COMÚN (Logueado y Verificado) ---
+// --- OTRAS RUTAS DE USUARIO (También protegidas) ---
+// Nota: Podrías unir este grupo con el de arriba, pero separarlos está bien para organizar
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // 1. MUESTRA la vista de "Mis Solicitudes" y el formulario para crear
-    // Esta vista (solicitudes.blade.php) debe tener <@livewire('solicitud-form') />
+    // Mis Solicitudes
     Route::get('/solicitudes', function () {
         return view('solicitudes.index');
     })->name('solicitudes.index');
 
-        Route::get('/solicitudes/crear', function () {
+    Route::get('/solicitudes/crear', function () {
         return view('solicitudes.create');
     })->name('solicitudes.create');
     
-
-    // --- NUEVA RUTA PERFIL ACADÉMICO ---
-    // Esta ruta carga la vista contenedora que creamos en el Paso 1
+    // Perfil Académico (Vista legacy o alternativa)
     Route::get('/perfil/academico', function () {
         return view('academicos.index');
     })->name('perfil.academico');
 
-    // 3. DESCARGA el PDF (Movido aquí por seguridad)
+    // Descarga de PDF
     Route::get('/comprobante/{id}', function($id) {
-        // Validar que el usuario es dueño de la solicitud
         $solicitud = SolicitudServicio::with(['departamento', 'edificio', 'cuenta'])
             ->where('id', $id)
-            // ->where('responsable_id', auth()->id()) // Descomenta esto para MÁXIMA seguridad
-            ->firstOrFail(); // Error 404 si no la encuentra
+            ->firstOrFail(); 
         
         $pdf = Pdf::loadView('pdf.comprobante', compact('solicitud'));
         
@@ -65,33 +69,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 // --- RUTAS PARA ADMINISTRADOR ---
-Route::middleware(['auth', 'verified', 'role:administrador']) // <-- ¡LA MAGIA DE SPATIE!
-     ->prefix('admin') // <-- Todas las URLs inician con /admin/...
-     ->name('admin.')   // <-- Todos los nombres de ruta inician con admin....
+Route::middleware(['auth', 'verified', 'role:administrador'])
+     ->prefix('admin')
+     ->name('admin.')
      ->group(function () {
 
-    // 1. MUESTRA el dashboard de Admin con TODAS las solicitudes
-    // URL: /admin/solicitudes
-    // Nombre de Ruta: admin.solicitudes.index
+    // Dashboard Admin
     Route::get('/solicitudes', [AdminSolicitudController::class, 'index'])
          ->name('solicitudes.index');
          
-    // 2. ACTUALIZA el estado de una solicitud
-    // URL: /admin/solicitud/5/actualizar-estado
-    // Nombre de Ruta: admin.solicitud.updateStatus
+    // Actualizar estado
     Route::patch('/solicitud/{solicitud}/actualizar-estado', [AdminSolicitudController::class, 'updateStatus'])
          ->name('solicitud.updateStatus');
-         
-    // (Aquí puedes agregar más rutas de admin, ej: gestión de usuarios)
-    // Route::resource('/usuarios', AdminUsuarioController::class);
 });
 
 
-// --- RUTA PÚBLICA DE PERFIL ---
+// --- RUTA PÚBLICA (Accesible sin login) ---
 Route::get('/investigador/{id}', [InvestigadorController::class, 'show'])
     ->name('investigador.publico');
 
-// En routes/web.php
+// Test de Roles
 Route::get('/test-roles', function() {
     $user = Auth::user();
     return [
@@ -99,7 +96,7 @@ Route::get('/test-roles', function() {
         'name' => $user->nombre,
         'email' => $user->email,
         'roles' => $user->getRoleNames(),
-        'is_admin' => $user->hasRole('admin'),
+        'is_admin' => $user->hasRole('administrador'), // Ojo: verifica si tu rol es 'admin' o 'administrador' en BD
         'permissions' => $user->getAllPermissions()->pluck('name')
     ];
 })->middleware('auth');

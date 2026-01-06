@@ -13,10 +13,10 @@ class InvestigadorController extends Controller
         // Buscamos al investigador por ID
         // 'with' carga las relaciones para optimizar la consulta (Eager Loading)
         $investigador = User::with([
-            'perfil.tipoAcademico',
-            'perfil.pride',
-            'perfil.sni',
-            'perfil.ubicacion',
+            'profile.tipoAcademico',
+            'profile.pride',
+            'profile.sni',
+            'profile.ubicacion',
             'formacionProfesional',
             'lineasInvestigacion'
         ])->findOrFail($id);
