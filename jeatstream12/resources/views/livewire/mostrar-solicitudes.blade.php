@@ -1,4 +1,16 @@
+
 <div>
+<div class="bg-red-600 text-white p-4 font-bold text-lg mb-4 rounded border-4 border-yellow-400">
+    🕵️ DIAGNÓSTICO EN VIVO:
+    <br>
+    1. Usuario actual: {{ Auth::user()->name }} (ID: {{ Auth::id() }})
+    <br>
+    2. ¿Modo "Solo Mías"?: {{ $soloMias ? 'SÍ (Activado - MAL para Admin)' : 'NO (Desactivado - BIEN para Admin)' }}
+    <br>
+    3. Total Solicitudes Encontradas: {{ $solicitudes->total() }}
+</div>
+
+    {{-- Encabezado --}}
     <div class="p-6 sm:px-20 bg-white border-b border-gray-200">
         <div class="flex justify-between items-center">
             <div class="text-2xl">Historial de Solicitudes de Servicio</div>
@@ -50,6 +62,7 @@
         @endif
     </div>
 
+    {{-- Tabla de Resultados --}}
     <div class="flex flex-col">
         <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
@@ -163,7 +176,7 @@
                         <div class="border-b border-r border-black p-2 bg-gray-50">
                             <label class="font-bold text-sm">Responsable:</label>
                             <input type="text" class="mt-1 block w-full border-none bg-transparent text-sm" 
-                                   value="{{ $solicitudSeleccionada->responsable->name ?? 'N/A' }}" readonly />
+                                   value="{{ $solicitudSeleccionada->responsable->nombrecompleto ?? 'N/A' }}" readonly />
                         </div>
                         <div class="border-b border-black p-2 bg-gray-50">
                             <label class="font-bold text-sm">Solicitante:</label>
@@ -291,57 +304,84 @@
                     </div>
                 @endif
 
-                {{-- Sección de Gestión --}}
-                <div class="bg-yellow-50 p-4 rounded border border-yellow-200">
-                    <label class="block font-bold mb-2 text-gray-700">Observaciones / Comentarios:</label>
-                    <textarea wire:model="comentarioAdmin" 
-                              class="w-full border-gray-300 rounded shadow-sm" 
-                              rows="3" 
-                              placeholder="Escribe observaciones para el usuario (requerido para rechazar)..."></textarea>
-                    @error('comentarioAdmin') <span class="text-red-500 text-sm block mt-1">{{ $message }}</span> @enderror
-                </div>
+                {{--  Visible para Admin --}}
+                @if(Auth::user()->email === 'yaiv.gm@gmail.com' || Auth::user()->hasRole('administrador'))
+                    <div class="bg-yellow-50 p-4 rounded border border-yellow-200">
+                        <label class="block font-bold mb-2 text-gray-700">Observaciones / Comentarios (Admin):</label>
+                        <textarea wire:model="comentarioAdmin" 
+                                  class="w-full border-gray-300 rounded shadow-sm" 
+                                  rows="3" 
+                                  placeholder="Escribe observaciones para el usuario (requerido para rechazar)..."></textarea>
+                        @error('comentarioAdmin') <span class="text-red-500 text-sm block mt-1">{{ $message }}</span> @enderror
+                    </div>
+                @endif
             @endif
         </x-slot>
     
+
         <x-slot name="footer">
+        <div class="flex flex-col w-full">
+            
             <div class="flex justify-end gap-3 w-full">
                 <x-secondary-button wire:click="$set('verModalDetalle', false)">
                     Cerrar
                 </x-secondary-button>
 
-                @if($solicitudSeleccionada && $solicitudSeleccionada->estado_servicio_id == 2)
-                    {{-- Solo mostrar botones si está en estado En Proceso --}}
-                    <x-danger-button wire:click="actualizarEstado(4)">
-                        Rechazar
-                    </x-danger-button>
+                {{-- Primero verificamos que exista una solicitud seleccionada --}}
+                @if($solicitudSeleccionada) 
 
-                    <button class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150" 
-                            wire:click="actualizarEstado(1)">
-                        Aprobar Solicitud
-                    </button>
-                @elseif($solicitudSeleccionada && $solicitudSeleccionada->estado_servicio_id == 1)
-                    {{-- Si está aprobada, permitir marcar como En Proceso --}}
-                    <button class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150" 
-                            wire:click="actualizarEstado(2)">
-                        Marcar En Proceso
-                    </button>
-                @endif
+                    {{-- Luego verificamos si es Admin (por email o rol) --}}
+                    @if(Auth::user()->email === 'yaiv.gm@gmail.com' || Auth::user()->hasRole('administrador'))
+                        
+                        {{-- GRUPO A: Si está PENDIENTE (3) o EN PROCESO (2) --}}
+                        @if(in_array($solicitudSeleccionada->estado_servicio_id, [2, 3]))
+                            
+                            {{-- 1. Botón Rechazar --}}
+                            <x-danger-button wire:click="actualizarEstado(4)">
+                                Rechazar
+                            </x-danger-button>
+
+                            {{-- 2. Opción de pasarlo a "En Proceso" (si es pendiente) --}}
+                            @if($solicitudSeleccionada->estado_servicio_id == 3)
+                                <button class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150" 
+                                        wire:click="actualizarEstado(2)">
+                                    Poner En Proceso
+                                </button>
+                            @endif
+
+                            {{-- 3. Botón Aprobar Final --}}
+                            <button class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150" 
+                                    wire:click="actualizarEstado(1)">
+                                Aprobar Solicitud
+                            </button>
+
+                        {{-- GRUPO B: Si ya está APROBADO (1) --}}
+                        @elseif($solicitudSeleccionada->estado_servicio_id == 1)
+                            
+                            <button class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150" 
+                                    wire:click="actualizarEstado(2)">
+                                Regresar a Proceso
+                            </button>
+
+                        @endif
+                    @endif
+                
+                @endif {{-- Fin del check de $solicitudSeleccionada --}}
             </div>
-        </x-slot>
+        </div>
+    </x-slot>
+
+
     </x-dialog-modal>
 
     {{-- Estilos personalizados para el modal --}}
     <style>
-        /* Hacer el modal más grande */
         [x-data] .fixed.inset-0 > div > div {
             max-width: 90vw !important;
         }
-        
-        /* Hacer el contenido scrollable */
         [x-data] .bg-white.rounded-lg {
             max-height: 90vh;
             overflow-y: auto;
         }
     </style>
-
 </div>

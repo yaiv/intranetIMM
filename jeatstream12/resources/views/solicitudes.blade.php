@@ -26,7 +26,6 @@
                     {{-- Se llama a componente Livewire --}}
                     @livewire('solicitud-form')
                   
-
                 </div>
 
             </div>

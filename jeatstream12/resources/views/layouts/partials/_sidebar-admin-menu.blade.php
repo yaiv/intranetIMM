@@ -16,15 +16,15 @@
         </a>
     </li>
 
-    <!-- Gestión de Solicitudes -->
+
     <li>
-        <a href="{{ route('solicitudes.index') }}" 
+        <a href="{{ route('admin.solicitudes.index') }}" 
            class="flex items-center justify-between px-4 py-3 rounded-lg {{ request()->routeIs('solicitudes.*') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100' }} transition">
             <div class="flex items-center space-x-3">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span class="font-medium">Solicitudes</span>
+                <span class="font-medium">Historial de Solicitudes</span>
             </div>
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -32,9 +32,40 @@
         </a>
     </li>
 
+    <li>
+        <a href="{{ route('solicitudes.index') }}" 
+           class="flex items-center justify-between px-4 py-3 rounded-lg {{ request()->routeIs('solicitudes.*') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100' }} transition">
+            <div class="flex items-center space-x-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span class="font-medium">Mis Solicitudes</span>
+            </div>
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+        </a>
+    </li>
+
+        <!-- Gestión de Solicitudes -->
+
+{{-- 1. BOTÓN PARA CREAR (Reutilizamos la ruta de usuario) --}}
+    <li>
+        <a href="{{ route('solicitudes.create') }}" 
+           class="flex items-center justify-between px-4 py-3 rounded-lg {{ request()->routeIs('solicitudes.create') ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100' }} transition">
+            <div class="flex items-center space-x-3">
+                {{-- Icono de Suma (+) para distinguir --}}
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="font-medium">Nueva Solicitud</span>
+            </div>
+        </a>
+    </li>
+
     <!-- Usuarios -->
     <li>
-        <a href="#" 
+        <a href="{{ route('admin.usuarios.index') }}" 
            class="flex items-center justify-between px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition">
             <div class="flex items-center space-x-3">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

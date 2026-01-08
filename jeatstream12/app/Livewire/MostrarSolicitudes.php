@@ -11,64 +11,86 @@ use Illuminate\Support\Facades\Auth;
 class MostrarSolicitudes extends Component
 {
     use WithPagination;
-public function render()
-{
-    $query = SolicitudServicio::with(['departamento', 'estadoServicio']);
 
-    if ($this->buscar) {
-        $busqueda = '%' . $this->buscar . '%';
-
-        $query->where(function ($q) use ($busqueda) {
-            $q->where('id', 'like', $busqueda)
-              ->orWhere('tipoEquipo', 'like', $busqueda)
-              ->orWhere('trabajoAFallarAparente', 'like', $busqueda)
-              ->orWhere('solicitante', 'like', $busqueda)
-              ->orWhereHas('departamento', function ($d) use ($busqueda) {
-                  $d->where('nombre', 'like', $busqueda);
-              })
-              ->orWhereHas('estadoServicio', function ($e) use ($busqueda) {
-                  $e->where('estado', 'like', $busqueda);
-              });
-        });
-    }
-
-    $solicitudes = $query->latest()->paginate(10);
-
-    return view('livewire.mostrar-solicitudes', [
-        'solicitudes' => $solicitudes
-    ]);
-}
     public $buscar = '';
-     // Propiedades para el modal de detalle y actualización
+    public $soloMias = false;
     public $solicitudSeleccionada = null;
     public $comentarioAdmin = '';
     public $verModalDetalle = false;
 
-       public function updatingBuscar()
+    public function mount($soloMias = false)
+    {
+        $this->soloMias = $soloMias;
+    }   
+
+    public function updatingBuscar()
     {
         $this->resetPage(); // Reiniciar paginación al buscar
-    }
+    }   
 
+    public function render()
+    {
+        $query = SolicitudServicio::with(['departamento', 'estadoServicio']);
+
+        if ($this->soloMias) {
+            $query->where('responsable_id', Auth::id());
+        }
+
+        if ($this->buscar) {
+            $busqueda = '%' . $this->buscar . '%';
+
+            $query->where(function ($q) use ($busqueda) {
+                $q->where('id', 'like', $busqueda)
+                  ->orWhere('tipoEquipo', 'like', $busqueda)
+                  ->orWhere('trabajoAFallarAparente', 'like', $busqueda)
+                  ->orWhere('solicitante', 'like', $busqueda)
+                  ->orWhereHas('departamento', function ($d) use ($busqueda) {
+                      $d->where('nombre', 'like', $busqueda);
+                  })
+                  ->orWhereHas('estadoServicio', function ($e) use ($busqueda) {
+                      $e->where('estado', 'like', $busqueda);
+                  });
+            });
+        }
+
+        $solicitudes = $query->latest()->paginate(10);
+
+        return view('livewire.mostrar-solicitudes', [
+            'solicitudes' => $solicitudes
+        ]);
+    }
 
     public function verDetalle($id)
     {
-        $this->solicitudSeleccionada = SolicitudServicio::with('estadoServicio', 'comentarios')->find($id);
-        $this->comentarioAdmin = ''; // Limpiar campo
-        $this->verModalDetalle = true;
+        $query = SolicitudServicio::with(['estadoServicio', 'comentarios', 'responsable', 'departamento', 'edificio', 'cuenta']);
+
+
+        if ($this->soloMias) {
+            $query->where('responsable_id', Auth::id());
+        }
+
+        $this->solicitudSeleccionada = $query->find($id);
+
+        // Si no encuentra la solicitud (o no es suya), no abre el modal
+        if ($this->solicitudSeleccionada) {
+            $this->comentarioAdmin = '';
+            $this->verModalDetalle = true;
+        }
     }
 
-
-    // Método para actualizar estado (Aprobar o Rechazar)
     public function actualizarEstado($nuevoEstadoId)
     {
-        // Validar: Si rechaza 
-        // Ajusta el ID 3 al ID que corresponda a "Rechazado" en BD
-        if ($nuevoEstadoId == 3 && empty($this->comentarioAdmin)) {
+
+        if (!Auth::user()->hasRole('administrador')) {
+            $this->dispatch('notify', 'No tienes permisos para realizar esta acción.'); // O un error 403
+            return;
+        }
+
+        if ($nuevoEstadoId == 4 && empty($this->comentarioAdmin)) {
             $this->addError('comentarioAdmin', 'Debes agregar un motivo para rechazar la solicitud.');
             return;
         }
 
-        // 1. Guardar en el historial/comentarios
         SolicitudComentario::create([
             'solicitud_servicio_id' => $this->solicitudSeleccionada->id,
             'user_id' => Auth::id(),
@@ -77,11 +99,10 @@ public function render()
             'estado_nuevo' => $nuevoEstadoId,
         ]);
 
-        // 2. Actualizar la solicitud
         $this->solicitudSeleccionada->estado_servicio_id = $nuevoEstadoId;
         $this->solicitudSeleccionada->save();
 
         $this->verModalDetalle = false;
-        $this->dispatch('notify', 'Solicitud actualizada correctamente'); 
+        $this->dispatch('notify', 'Solicitud actualizada correctamente');
     }
 }

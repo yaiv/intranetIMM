@@ -81,6 +81,11 @@ Route::middleware(['auth', 'verified', 'role:administrador'])
     // Actualizar estado
     Route::patch('/solicitud/{solicitud}/actualizar-estado', [AdminSolicitudController::class, 'updateStatus'])
          ->name('solicitud.updateStatus');
+
+         // Ruta de Usuarios
+Route::get('/usuarios', function () {
+    return view('admin.usuarios.index');
+})->name('usuarios.index');
 });
 
 
