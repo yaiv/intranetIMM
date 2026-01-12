@@ -1,14 +1,5 @@
 
 <div>
-<div class="bg-red-600 text-white p-4 font-bold text-lg mb-4 rounded border-4 border-yellow-400">
-    🕵️ DIAGNÓSTICO EN VIVO:
-    <br>
-    1. Usuario actual: {{ Auth::user()->name }} (ID: {{ Auth::id() }})
-    <br>
-    2. ¿Modo "Solo Mías"?: {{ $soloMias ? 'SÍ (Activado - MAL para Admin)' : 'NO (Desactivado - BIEN para Admin)' }}
-    <br>
-    3. Total Solicitudes Encontradas: {{ $solicitudes->total() }}
-</div>
 
     {{-- Encabezado --}}
     <div class="p-6 sm:px-20 bg-white border-b border-gray-200">
